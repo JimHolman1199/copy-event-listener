@@ -1,35 +1,31 @@
-(function () {
-    function addLink() {
 
-        var selection = window.getSelection();
+(function() {
+  document.addEventListener("copy", function() {
+    var copiedText = window
+        .getSelection()
+        .toString()
+        .substring(0, 100),
+      emailRegex = /[a-zA-Z0-9-_.]+@[a-zA-Z0-9-_.]+/gi,
+      phoneRegex = /^[+]?[\s./0-9]*[(]?[0-9]{1,4}[)]?[-\s./0-9]*$/gi,
+      result;
 
-        dataLayer.push({
-            'event': 'resultify',
-            'eventCategory': 'copiedText',
-            'eventAction': '{{Page Path}}',
-            'eventLabel': selection //window.getSelection().toString()
-        });
+    var copiedTextArr = copiedText.split(" ");
 
-        if (/@/.test(selection)) {
-            return true
-        } else {
-            var pagelink = '<br /> Read more at: ' + document.location.href,
-                copytext = selection + pagelink,
-                newdiv = document.createElement('div');
-
-            newdiv.style.position = 'absolute';
-            newdiv.style.left = '-99999px';
-
-            document.body.appendChild(newdiv);
-            newdiv.innerHTML = copytext;
-            selection.selectAllChildren(newdiv);
-
-
-            window.setTimeout(function () {
-                document.body.removeChild(newdiv);
-            }, 100);
-        }
-
+    for (var i = 0; i < copiedTextArr.length; i++) {
+      if (copiedTextArr[i].match(emailRegex)) {
+        copiedTextArr[i] = "@Email Here@";
+      }
+      if (copiedTextArr[i].match(phoneRegex)) {
+        copiedTextArr[i] = "@Phone number here@";
+      }
     }
-    document.addEventListener('copy', addLink);
-})()  
+    result = copiedTextArr.join(" ");
+
+    dataLayer.push({
+      event: "GAevent",
+      eventCategory: "Copy text",
+      eventAction: result,
+      "non-Interaction-hit": false
+    });
+  });
+})();
